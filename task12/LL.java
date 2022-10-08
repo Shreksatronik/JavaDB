@@ -5,7 +5,7 @@ import java.util.LinkedList;
 
 public class LL{
     LinkedList<String> list;
-    boolean isReady = false;
+    volatile boolean  isReady = false;
 
     public  LL() {
         this.list = new LinkedList<>();

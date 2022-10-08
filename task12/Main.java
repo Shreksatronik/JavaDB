@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import com.google.common.base.Splitter;
+
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         LL list = new LL();
         Thread thread = new Thread(new Sorter(list));
         thread.start();
@@ -17,11 +17,9 @@ public class Main {
         String inputData = in.nextLine();
         while (inputData.compareTo("") != 0) {
             if (inputData.length() >= 80) {
-                Iterable<String> split = Splitter.fixedLength(80).split(inputData);
-                List<String> splitToList = new ArrayList<>();
-                split.forEach(splitToList::add);
-                for (String s : splitToList) {
-                    list.add(s);
+                String[] lines = inputData.split("(?<=\\G.{" + 80 + "})");
+               for (String line : lines){
+                    list.add(line);
                 }
             }
                 list.add(inputData);
