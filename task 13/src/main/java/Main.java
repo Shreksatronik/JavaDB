@@ -1,4 +1,3 @@
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,10 +10,8 @@ public class Main {
 
         String[] names = new String[]{"Socrates", "Plato", "Aristotle", "Thales", "Pythagoras"};
 
-
         List<WellFedPhilosopher> philosophers = new ArrayList<>();
         for (int i = 0; i < 5; ++i) {
-
             philosophers.add(new WellFedPhilosopher(names[i], forks[i], i == 4 ? forks[0] : forks[i + 1]));
         }
         philosophers.forEach(philosopher -> new Thread(philosopher).start());

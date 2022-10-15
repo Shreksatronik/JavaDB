@@ -1,5 +1,5 @@
-
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.locks.Lock;
 
 public class WellFedPhilosopher implements Runnable {
     private String name;
@@ -14,7 +14,7 @@ public class WellFedPhilosopher implements Runnable {
     }
 
     private void randomSleep() {
-        long millis = ThreadLocalRandom.current().nextLong(1000, 6000);
+        long millis = ThreadLocalRandom.current().nextLong(1000, 2000);
         try {
             Thread.sleep(millis);
         } catch (InterruptedException exception) {
@@ -30,17 +30,20 @@ public class WellFedPhilosopher implements Runnable {
             Fork second = left.getId() > right.getId() ? left : right;
             Fork.forks.lock();
             while (!hasEaten){
-            synchronized (first) {
+            if (first.tryPickUp()) {
                 System.out.println("The " + name + " philosopher picked up the first fork");
-                synchronized (second) {
+               if (second.tryPickUp()) {
                     System.out.println("The " + name + " philosopher picked up the second fork");
                     System.out.println("The " + name + " philosopher began the meal");
                     randomSleep();
                     hasEaten = true;
                     System.out.println("The " + name + " philosopher put down the second fork");
+                    first.putDown();
                 }
+                second.putDown();
                 System.out.println("The " + name + " philosopher put down the first fork");
                 System.out.println("The " + name + " philosopher finished the meal");
+
             }
                 if (hasEaten) {
                     Fork.tryLockFork.signalAll();
@@ -55,7 +58,6 @@ public class WellFedPhilosopher implements Runnable {
                 }
             }
             hasEaten = false;
-
         }
     }
 }
