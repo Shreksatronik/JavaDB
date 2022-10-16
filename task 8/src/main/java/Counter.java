@@ -1,19 +1,16 @@
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
 
 public class Counter implements Runnable {
     int count;
     int threadNum;
-    boolean flag;
+    volatile boolean flag;
     double Sum ;
-    CyclicBarrier cyclicBarrier;
     int i = 0;
-    public Counter(int count, int threadNum,CyclicBarrier cyclicBarrier) {
+    public Counter(int count, int threadNum) {
         this.count = count;
         this.threadNum = threadNum;
-        this.cyclicBarrier = cyclicBarrier;
         Sum = 0.0;
         flag = true;
+
     }
 
     public double getSum() {
@@ -22,26 +19,26 @@ public class Counter implements Runnable {
 
     @Override
     public void run() {
-        int iterator = threadNum;
+        long iterator = threadNum;
+        double Max = 0.0;
         while(flag){
             Sum += Math.pow((-1.0), iterator)/(2*iterator+1);
             iterator += count;
             i++;
-            if (i % 100 == 0){
-                try{
-                    cyclicBarrier.await();
-                } catch (BrokenBarrierException | InterruptedException e) {
-                    e.printStackTrace();
-                }
+            if (i > Max){
+                    Max = i;
             }
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+
+        }
+        if(!flag){
+            for(long j = iterator;j<Max;j++){
+                Sum += Math.pow((-1.0), iterator)/(2*iterator+1);
+                iterator += count;
+                i++;
             }
         }
     }
     public void stop(){
         flag = false;
-    }
+        }
 }

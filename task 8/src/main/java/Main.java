@@ -1,21 +1,20 @@
-
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.concurrent.CyclicBarrier;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 
 public class Main {
 
     public static void main(String[] args) {
+        Semaphore semaphore = new Semaphore(0);
         System.out.println("Please write the number of threads");
         Scanner in = new Scanner(System.in);
         int Count = in.nextInt();
         List<Counter> counters = new ArrayList<>();
         List<Thread> threads = new ArrayList<>();
-        CyclicBarrier cyclicBarrier = new CyclicBarrier(Count);
         for(int i = 0;i<Count;i++){
-            counters.add(new Counter(Count, i ,cyclicBarrier));
+            counters.add(new Counter(Count, i));
             threads.add(new Thread(counters.get(i)));
         }
         for (Thread thread : threads) {
@@ -26,12 +25,14 @@ public class Main {
             public void run() {
                 System.out.println("Is working");
                 for (int i = 0; i < Count; i++) {
+                    semaphore.release();
                     counters.get(i).stop();
                 }
                 try {
-                    Thread.sleep(2000);
+                    semaphore.acquire();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+
                 }
                 double sum = 0;
                 for (int i = 0; i < Count; i++) {
@@ -42,5 +43,6 @@ public class Main {
             }
 
         });
+
         }
     }
