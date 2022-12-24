@@ -36,7 +36,6 @@ public class Main {
             }
         });
         thread.start();
-        Thread.sleep(1000);
         while (true){
             for (int i = 0; i < 25; i++) {
                 System.out.println(linesQueue.take());
