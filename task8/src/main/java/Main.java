@@ -1,6 +1,6 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.concurrent.CyclicBarrier;
 
 public class Main {
     public static void main(String[] args) {
@@ -8,44 +8,36 @@ public class Main {
         ArrayList<Counter> counters = new ArrayList<>();
         ArrayList<Thread> threads = new ArrayList<>();
         int threadsAmount = scanner.nextInt();
+        CyclicBarrier cyclicBarrier = new CyclicBarrier(threadsAmount);
         for (int i = 0; i < threadsAmount; i++) {
-            counters.add(new Counter(i, threadsAmount));
-            threads.add(new Thread(counters.get(i)));
+            Counter counter = new Counter(i, threadsAmount, cyclicBarrier);
+            counters.add(counter);
+            threads.add(new Thread(counter));
         }
-        for (Thread thread : threads) {
-            thread.start();
-        }
+        threads.forEach(Thread::start);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            ArrayList<Integer> countersI = new ArrayList<>();
-            System.out.println("\nStopping threads\n");
-            int max = 0;
-            for (Counter counter:counters) {
-                counter.setFlag(State.WAITING);
-                countersI.add(counter.getCurrentI());
-            }
-            for (int i = 0; i < counters.size(); i++) {
-                if (max<countersI.get(i)){
-                    max = countersI.get(i);
+            System.out.println("Останавливаем подсчет...");
+            counters.forEach(counter -> counter.caughtSignal = true);
+            long maxI = 0;
+            for (Counter counter : counters) {
+                if (maxI < counter.getCurrentI()) {
+                    maxI = counter.getCurrentI();
                 }
             }
-            System.out.println(max);
-            for (Counter counter:counters) {
-                counter.setMaxI(max);
-                counter.setFlag(State.RECOUNTING);
+            MaxCounter maxCounter = new MaxCounter();
+            maxCounter.setMaxI(maxI);
+            double result = 0.0;
+            for (Thread thread : threads) {
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
-            for (Counter counter:counters) {
-                counter.setFlag(State.STOPPED);
+            for (Counter counter : counters) {
+                result += counter.getRes();
             }
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            double res = 0;
-            for (Counter counter:counters) {
-                res += counter.getRes();
-            }
-            System.out.println(res * 4);
+            System.out.println(result * 4);
         }));
     }
 }
