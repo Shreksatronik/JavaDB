@@ -41,7 +41,7 @@ public class Main {
             for (int i = 0; i < 25; i++) {
                 String line = linesQueue.take();
                 System.out.println(line);
-                if (line.equals("0")){
+                if (line.equals("</html>")){
                     return;
                 }
 
