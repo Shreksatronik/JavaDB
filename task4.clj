@@ -63,7 +63,7 @@
                 (swap! storage-atom #(- % needed))
                 (update buffer ware #(+ % needed)))
               (catch IllegalStateException _ buffer))
-            buffer)]
+            buffer)]                 
         (if (= bill internal-buffer)
           (do
             (Thread/sleep (state :duration))
@@ -86,3 +86,22 @@
 (defn start []
   (.start ore-mine)
   (.start lumber-mill))
+
+
+(defn stop []
+  (.stop ore-mine)
+  (.stop lumber-mill))
+
+(agent-error (gears-factory :worker))
+(agent-error (metal-storage :worker))
+
+(defn run []
+(do
+  (start)
+  (Thread/sleep 60000)
+  (stop)
+  (println(agent-error(gears-factory :worker)))
+  (println @(ore-storage :storage))
+  (println @(safe-storage :storage))))
+
+(run)
