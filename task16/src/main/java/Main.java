@@ -36,9 +36,15 @@ public class Main {
             }
         });
         thread.start();
+
         while (true){
             for (int i = 0; i < 25; i++) {
-                System.out.println(linesQueue.take());
+                String line = linesQueue.take();
+                System.out.println(line);
+                if (line.equals("0")){
+                    return;
+                }
+
             }
             System.out.println("=======================================");
             String inp = "not null";
