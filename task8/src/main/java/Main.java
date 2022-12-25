@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Main {
     public static void main(String[] args) {
@@ -9,12 +11,17 @@ public class Main {
         ArrayList<Thread> threads = new ArrayList<>();
         int threadsAmount = scanner.nextInt();
         CyclicBarrier cyclicBarrier = new CyclicBarrier(threadsAmount);
+        ReentrantLock reentrantLock = new ReentrantLock();
+        Condition condition = reentrantLock.newCondition();
+        MaxCounter maxCounter = new MaxCounter(reentrantLock, condition);
         for (int i = 0; i < threadsAmount; i++) {
-            Counter counter = new Counter(i, threadsAmount, cyclicBarrier);
+            Counter counter = new Counter(i, threadsAmount, cyclicBarrier, maxCounter);
             counters.add(counter);
             threads.add(new Thread(counter));
         }
         threads.forEach(Thread::start);
+
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Останавливаем подсчет...");
             counters.forEach(counter -> counter.caughtSignal = true);
@@ -24,7 +31,6 @@ public class Main {
                     maxI = counter.getCurrentI();
                 }
             }
-            MaxCounter maxCounter = new MaxCounter();
             maxCounter.setMaxI(maxI);
             double result = 0.0;
             for (Thread thread : threads) {

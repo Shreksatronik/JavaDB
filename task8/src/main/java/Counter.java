@@ -4,24 +4,24 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Counter implements Runnable {
-    public volatile Boolean caughtSignal;
-    public volatile Boolean waiting;
-    private Long maxI;
+    public volatile boolean caughtSignal;
+    private long maxI;
     private long currentI;
     private double res;
     private final int threadNum;
     private final int threadCount;
-    private CyclicBarrier cyclicBarrier;
+    private final CyclicBarrier cyclicBarrier;
+    private final MaxCounter maxCounter;
 
 
-    Counter(int threadNum, int threadCount, CyclicBarrier cyclicBarrier) {
+    Counter(int threadNum, int threadCount, CyclicBarrier cyclicBarrier, MaxCounter maxCounter) {
         caughtSignal = false;
-        waiting = false;
         maxI = 0L;
         currentI = 0;
         res = 0;
         this.threadNum = threadNum;
         this.threadCount = threadCount;
+        this.maxCounter = maxCounter;
         this.cyclicBarrier = cyclicBarrier;
     }
 
@@ -39,10 +39,7 @@ public class Counter implements Runnable {
                     + " caught signal: " + caughtSignal);
         }
         System.out.println("Caught signal");
-        MaxCounter maxCounter = new MaxCounter();
-        ReentrantLock reentrantLock = new ReentrantLock();
-        Condition condition = reentrantLock.newCondition();
-        maxI = maxCounter.getMaxI(reentrantLock, condition);
+        maxI = maxCounter.getMaxI();
         try {
             cyclicBarrier.await();
         } catch (InterruptedException | BrokenBarrierException e) {

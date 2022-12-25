@@ -3,8 +3,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class MaxCounter {
     private static long maxI = 0;
-
-    public long getMaxI(ReentrantLock reentrantLock, Condition condition) {
+    private final ReentrantLock reentrantLock;
+    private final Condition condition;
+    MaxCounter(ReentrantLock reentrantLock, Condition condition){
+        this.reentrantLock = reentrantLock;
+        this.condition = condition;
+    }
+    public long getMaxI() {
         try {
             reentrantLock.lock();
             while (maxI == 0) {
