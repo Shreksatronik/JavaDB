@@ -11,11 +11,8 @@ public class Main {
         ArrayList<Thread> threads = new ArrayList<>();
         int threadsAmount = scanner.nextInt();
         CyclicBarrier cyclicBarrier = new CyclicBarrier(threadsAmount);
-        ReentrantLock reentrantLock = new ReentrantLock();
-        Condition condition = reentrantLock.newCondition();
-        MaxCounter maxCounter = new MaxCounter(reentrantLock, condition);
         for (int i = 0; i < threadsAmount; i++) {
-            Counter counter = new Counter(i, threadsAmount, cyclicBarrier, maxCounter);
+            Counter counter = new Counter(i, threadsAmount, cyclicBarrier);
             counters.add(counter);
             threads.add(new Thread(counter));
         }
@@ -25,13 +22,6 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Останавливаем подсчет...");
             counters.forEach(counter -> counter.caughtSignal = true);
-            long maxI = 0;
-            for (Counter counter : counters) {
-                if (maxI < counter.getCurrentI()) {
-                    maxI = counter.getCurrentI();
-                }
-            }
-            maxCounter.setMaxI(maxI);
             double result = 0.0;
             for (Thread thread : threads) {
                 try {
